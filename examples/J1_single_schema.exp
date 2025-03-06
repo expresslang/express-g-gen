@@ -1,0 +1,37 @@
+SCHEMA example;
+TYPE date = ARRAY [1:3] OF INTEGER;
+END_TYPE;
+TYPE hair_type = ENUMERATION OF
+(blonde,
+brown,
+black,
+red,
+white,
+bald);
+END_TYPE;
+ENTITY person;
+first_name : STRING;
+last_name : STRING;
+nickname : OPTIONAL STRING;
+birth_date : date;
+children : SET [0:?] OF person;
+hair : hair_type;
+DERIVE
+age : INTEGER := years(birth_date);
+INVERSE
+parents : SET [0:2] OF person FOR children;
+END_ENTITY;
+
+SUBTYPE_CONSTRAINT sc_person FOR person;
+ONEOF(female, male);
+END_SUBTYPE_CONSTRAINT;
+ENTITY female
+SUBTYPE OF (person);
+INVERSE
+husband : SET [0:1] OF male FOR wife; -- husband is optional !
+END_ENTITY;
+ENTITY male
+SUBTYPE OF (person);
+wife : OPTIONAL female;
+END_ENTITY;
+FUNCTION years(past : date): INTEGER;

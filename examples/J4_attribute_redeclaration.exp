@@ -1,0 +1,14 @@
+ENTITY sup_a;
+attr : sup_b;
+END_ENTITY;
+ENTITY sub_a
+SUBTYPE OF (sup_a);
+SELF\sup_a.attr : sub_b;
+END_ENTITY;
+ENTITY sup_b;
+num : OPTIONAL NUMBER;
+END_ENTITY;
+ENTITY sub_b
+SUBTYPE OF (sup_b);
+SELF\sup_b.num : REAL;
+END_ENTITY;

@@ -1,0 +1,43 @@
+SCHEMA geom;
+ENTITY lcs;
+END_ENTITY;
+ENTITY surface;
+END_ENTITY;
+ENTITY curve;
+END_ENTITY;
+ENTITY point;
+END_ENTITY;
+END_SCHEMA; -- geom
+SCHEMA top;
+USE FROM geom
+(curve,
+point AS node);
+REFERENCE FROM geom
+(surface);
+ENTITY face;
+bounds : LIST [1:?] OF loop;
+loc : surface;
+END_ENTITY;
+ENTITY loop;
+END_ENTITY;
+SUBTYPE_CONSTRAINT sc_loop FOR loop;
+ABSTRACT;
+ONEOF(eloop, vloop);
+END_SUBTYPE_CONSTRAINT;
+ENTITY eloop
+SUBTYPE OF (loop);
+bound : LIST [1:?] OF edge;
+END_ENTITY;
+ENTITY vloop
+SUBTYPE OF (loop);
+bound : vertex;
+END_ENTITY;
+ENTITY edge;
+start : vertex;
+end : vertex;
+loc : curve;
+END_ENTITY;
+ENTITY vertex;
+loc : node;
+END_ENTITY;
+END_SCHEMA; -- top
