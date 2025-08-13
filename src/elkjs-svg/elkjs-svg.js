@@ -153,7 +153,9 @@ Renderer.prototype = {
     var children = [];
 
     var defsChildren = [];
-    if (styles != null || defs != null) {
+    var renderDefs = (styles != null || defs != null);
+    
+    if (renderDefs) {
       if (styles != null) {
         defsChildren.push(this.svgCss(styles == "DEFAULT"? this._style: styles));
       }
@@ -162,10 +164,11 @@ Renderer.prototype = {
       }
 
       children.push(new Xml("defs", {}, defsChildren));
-    }
 
-    if (background != null) {
-      children.push(background == "DEFAULT"? this._background: this._background);
+      // Only add background when we're also adding defs
+      if (background != null) {
+        children.push(background == "DEFAULT" ? this._background : background);
+      }
     }
 
     children.push(this.renderGraph(root));
@@ -199,7 +202,7 @@ Renderer.prototype = {
         }
         //console.log(edge_min_x)
         //console.log(edge_min_y)
-        if (edge.class.includes("USE FROM") | edge.class.includes("REFERENCE FROM")) {
+        if (edge.class && (edge.class.includes("USE FROM") || edge.class.includes("REFERENCE FROM") || edge.class.includes("use") || edge.class.includes("reference"))) {
           edge.x = Math.min(...edge_min_x);
           edge.y = Math.min(...edge_min_y);
           children.push(this.renderEdgeDefinitionArrow(edge))
@@ -248,7 +251,15 @@ Renderer.prototype = {
       }
     }
 
-    return new Xml("g", {"transform": `translate(${graph.x || 0},${graph.y || 0})`}, children);
+    // Only add transform group if there's actual translation needed
+    const x = graph.x || 0;
+    const y = graph.y || 0;
+    if (x !== 0 || y !== 0) {
+      return new Xml("g", {"transform": `translate(${x},${y})`}, children);
+    } else {
+      // For root level or zero-offset graphs, return children directly wrapped in a simple group
+      return new Xml("g", {}, children);
+    }
   },
 
   renderPortsAndLabels(node) {
@@ -264,7 +275,8 @@ Renderer.prototype = {
             children.push(this.renderRectangle(p));  
           }
         } else {
-          children.push(this.renderCirclePort(p));
+          // Changed: render rectangle instead of circle port to match original behavior
+          children.push(this.renderRectangle(p));
         }
 
         if (p.labels) {
@@ -285,6 +297,7 @@ Renderer.prototype = {
     return new Xml("rect", {
       ...this.idClass(node, "node"),
       ...this.posSizeRectangle(node),
+      ...this.style(node),
       ...this.attributes(node)
     })
   },
@@ -430,13 +443,12 @@ Renderer.prototype = {
     if (this._edgeRoutingStyle[node.id] == "SPLINES" || this._edgeRoutingStyle.__global == "SPLINES") {
       return this.renderPath(edge, bends);
     } else if (this._edgeRoutingStyle[node.id] == "DASHED_POLY" || this._edgeRoutingStyle.__global == "DASHED_POLY") {
-      return this.renderDashedPolyline(edges, bends);
-    } else if (edge.class.includes("USE FROM")) {
-      return this.renderPolyline(edge, bends);
-    } else if (edge.class.includes("REFERENCE FROM")) {
       return this.renderDashedPolyline(edge, bends);
-    }
-    else {
+    } else if (edge.class && (edge.class.includes("USE FROM") || edge.class.includes("use"))) {
+      return this.renderPolyline(edge, bends);
+    } else if (edge.class && (edge.class.includes("REFERENCE FROM") || edge.class.includes("reference"))) {
+      return this.renderDashedPolyline(edge, bends);
+    } else {
       return this.renderPolyline(edge, bends);
     }
   },
@@ -702,9 +714,10 @@ Renderer.prototype = {
    * Public API
    */
 
-  toSvg(json, styles="DEFAULT", defs="DEFAULT") {
+  toSvg(json, styles="DEFAULT", defs="DEFAULT", background="DEFAULT") {
    this.init(json);
-   var tree = this.renderRoot(json, styles, defs);
+   // When styles and defs are null but background should still be rendered by default
+   var tree = this.renderRoot(json, styles, defs, background);
    return tree.render();
   }
 };
