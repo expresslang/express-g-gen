@@ -1,10 +1,73 @@
-node_modules
+# Dependencies
+node_modules/
+package-lock.json
+
+# Generated outputs - diagram generation
+output/
+examples/*.json
+examples/*.svg
+examples/*_layout.json
+examples/*_pre_layout.json
+js_testing/*.json
+js_testing/*.svg
+js_testing/*_layout.json
+js_testing/*_pre_layout.json
+
+# Static assets (large files)
+attached_assets/
+assets/
+
+# Cache directories
+.cache/
+.local/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Temporary files
+*.tmp
+temp.txt
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# OS files
+__MACOSX/
+.Spotlight-V100
+.Trashes
+._*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Testing
+coverage/
+.nyc_output/
+
+# Build outputs
+dist/
+build/
+
+# Legacy paths (project-specific)
 .Rhistory
 .parquet
 IP_OP_PART_DATA
-.log
 R_LOGGING
 /step_express_tools/javascript_source/ref_output
 /step_express_tools/javascript_source/output
-package-lock.json
-
